@@ -1,0 +1,115 @@
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id             Int       @id @default(autoincrement())
+  firstName      String
+  lastName       String
+  email          String?   @unique
+  emailVerified  Boolean   @default(false)
+  profileUrl     String?
+  password       String?
+  sex            String
+  Account        Account?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @default(now())
+  Sender         Friend[]  @relation("sender")
+  Reciver        Friend[]  @relation("reciver")
+  requestSender  Request[] @relation("sender")
+  reuestReceiver Request[] @relation("receiver")
+  post           Post[]    @relation("postCreated")
+  comment        Comment?
+
+  likedPost       LikePost[]
+  MessageSender   Message[]  @relation("sender")
+  MessageReceiver Message[]  @relation("receiver")
+}
+
+model Friend {
+  sender     User     @relation("sender", fields: [senderId], references: [id])
+  senderId   Int
+  receiver   User     @relation("reciver", fields: [receiverId], references: [id])
+  receiverId Int
+  createdAt  DateTime @default(now())
+
+  @@id([senderId, receiverId])
+}
+
+model Request {
+  sender     User     @relation("sender", fields: [senderId], references: [id])
+  senderId   Int
+  receiver   User     @relation("receiver", fields: [receiverId], references: [id])
+  receiverId Int
+  createdAt  DateTime @default(now())
+
+  @@id([senderId, receiverId])
+}
+
+model Post {
+  id        Int        @id @default(autoincrement())
+  imageUrl  String?
+  content   String
+  user      User       @relation("postCreated", fields: [userId], references: [id])
+  createdAt DateTime   @default(now())
+  userId    Int
+  comment   Comment[]
+  likedBy   LikePost[]
+}
+
+model LikePost {
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int
+  createdAt DateTime @default(now())
+
+  @@id([postId, userId])
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  content   String
+  user      User     @relation(fields: [userId], references: [id])
+  userId    Int      @unique
+  post      Post     @relation(fields: [postId], references: [id])
+  postId    Int
+  createdAt DateTime @default(now())
+}
+
+model Message {
+  id          Int    @id @default(autoincrement())
+  content     String
+  sender      User   @relation("sender", fields: [senderId], references: [id])
+  senderId    Int
+  receiver    User   @relation("receiver", fields: [recevicerId], references: [id])
+  recevicerId Int
+}
+
+model Account {
+  id                       String  @id @default(cuid())
+  userId                   Int     @unique
+  type                     String
+  provider                 String
+  providerAccountId        String
+  refresh_token            String? @db.Text
+  access_token             String? @db.Text
+  expires_at               Int?
+  token_type               String?
+  scope                    String?
+  id_token                 String? @db.Text
+  session_state            String?
+  refresh_token_expires_in Int?
+  user                     User?   @relation(fields: [userId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
