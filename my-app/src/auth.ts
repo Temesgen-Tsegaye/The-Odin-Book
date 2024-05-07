@@ -9,18 +9,14 @@ import passage from "next-auth/providers/passage"
  const prisma = new PrismaClient()
 export const { handlers, signIn, signOut, auth } = NextAuth({
     pages:{
-    
+       
       signIn:"/login"
     },
   providers: [
     Credentials({
       // You can specify which fields should be submitted, by adding keys to the `credentials` object.
       // e.g. domain, username, password, 2FA token, etc.
-      credentials: {
-        email: {},
-        password: {},
-
-      },
+     
       authorize: async (credentials) => {
         let user = null
  console.log(credentials,'cre')
@@ -28,11 +24,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         // const pwHash = saltAndHashPassword(credentials.password)
      
         // logic to verify if user exists
-        user = await prisma.user.findUnique({
-            where:{
-                email:credentials.email
-            }
-      })
+      //   user = await prisma.user.findUnique({
+      //       where:{
+      //           email:credentials.email
+      //       }
+      // })
  
         if (!user) {
           // No user found, so this is their first attempt to login
